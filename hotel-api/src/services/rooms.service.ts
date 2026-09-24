@@ -3,8 +3,9 @@ import {
   Room,
   CreateRoomDto,
   UpdateRoomDto,
-  PaginatedResponse
+  PaginatedResponse,
 } from '../types';
+import { AppError } from '../errors/AppError';
 
 export class RoomsService {
   constructor(private readonly repository: RoomsRepository) {}
@@ -20,34 +21,24 @@ export class RoomsService {
     return { data, total: all.length, page: safePage, limit: safeLimit };
   }
 
-  async getById(id: number): Promise<Room | null> {
-    return this.repository.findById(id);
+  async getById(id: number): Promise<Room> {
+    const room = await this.repository.findById(id);
+    if (!room) throw new AppError(404, `Room ${id} not found`);
+    return room;
   }
 
   async create(dto: CreateRoomDto): Promise<Room> {
-    if (!dto.number || dto.number.trim() === '') {
-      throw new Error('number is required');
-    }
-    if (dto.pricePerNight <= 0) {
-      throw new Error('pricePerNight must be greater than 0');
-    }
-    if (dto.capacity <= 0) {
-      throw new Error('capacity must be greater than 0');
-    }
     return this.repository.create(dto);
   }
 
-  async update(id: number, dto: UpdateRoomDto): Promise<Room | null> {
-    if (dto.pricePerNight !== undefined && dto.pricePerNight <= 0) {
-      throw new Error('pricePerNight must be greater than 0');
-    }
-    if (dto.capacity !== undefined && dto.capacity <= 0) {
-      throw new Error('capacity must be greater than 0');
-    }
-    return this.repository.update(id, dto);
+  async update(id: number, dto: UpdateRoomDto): Promise<Room> {
+    const room = await this.repository.update(id, dto);
+    if (!room) throw new AppError(404, `Room ${id} not found`);
+    return room;
   }
 
-  async delete(id: number): Promise<boolean> {
-    return this.repository.delete(id);
+  async delete(id: number): Promise<void> {
+    const deleted = await this.repository.delete(id);
+    if (!deleted) throw new AppError(404, `Room ${id} not found`);
   }
 }

@@ -1,17 +1,17 @@
-export type RoomType = 'single' | 'double' | 'suite' | 'deluxe';
+import type { CreateRoomInput, UpdateRoomInput } from './schemas/rooms.schema';
 
 export interface Room {
   id: number;
   number: string;
-  type: RoomType;
+  type: 'single' | 'double' | 'suite' | 'deluxe';
   pricePerNight: number;
   capacity: number;
   isAvailable: boolean;
   createdAt: string;
 }
 
-export type CreateRoomDto = Omit<Room, 'id' | 'createdAt'>;
-export type UpdateRoomDto = Partial<CreateRoomDto>;
+export type CreateRoomDto = CreateRoomInput;
+export type UpdateRoomDto = UpdateRoomInput;
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -27,4 +27,5 @@ export interface SingleResponse<T> {
 export interface ErrorResponse {
   error: string;
   message: string;
+  issues?: Array<{ path: (string | number)[]; message: string }>;
 }
